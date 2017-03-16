@@ -11,9 +11,11 @@ Install dependances
 
 Run: `python(3) learner.py [OPTIONS]`
 
-Option available:
+Command line parameters available:
 
- -  `-n` how many words to ask in one run, defaults to 10; for example `python learner.py -n 15`
+ - `-n [NUMBER]` how many words to ask in one run, defaults to 10; for example `python learner.py -n 15`;
+ - `-test` to skip writing the results to Excel file;
+ - `-silent` to skipe workd voiceover while iterating;
 
 ### Data file structure
 

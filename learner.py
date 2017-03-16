@@ -4,7 +4,6 @@ import random
 import os
 import sys
 from time import sleep
-
 from gtts import gTTS
 import pyglet
 
@@ -18,45 +17,34 @@ flag_do_sound = True
 flag_do_write = True
 number_words = 10
 
-# TODOs:
-#  - read langs from file
-#  - write to excke file
-
-# def print_words():
-#     sh = exportcsv.read_words_list()
-#     for i, row in enumerate(sh.rows):
-#         if i == 0:
-#             print(row[0].value, '      ', row[1].value)
-#             print ('------------')
-#         else:
-#             print(' %s  -  %s' % (row[0].value, row[1].value))
+#global var 
+results = []
 
 def ask_words_list(limit=number_words):
     """
     iterates certain amount of word lines
     """
 
-    start = 15
+    start = 5
     sh = exportcsv.read_words_list()
-    results = []
-    for i, row in enumerate(sh.rows):
-        if i > start and i <=limit + start:
-            results.append(do_step(i, (row[0].value, row[1].value)))
-    
-    return results
+    global results
 
-def calc_stats(results_list):
+    for i, row in enumerate(sh.rows):
+        if i > start and i <=int(limit) + start:
+            results.append(do_step(i, (row[0].value, row[1].value)))
+
+def calc_stats():
     """
     calculates and prints ratio
     """
-
-    ratio = results_list.count(True)/len(results_list)
+    
+    ratio = results.count(True)/len(results)
 
     if flag_do_write: exportcsv.write_stats(number_words, ratio)
 
-    print('Success ratio: %s', ratio)
+    print('Success ratio: %s' % ratio)
 
-def ask_word(word, lang='en'):
+def ask_word(word, lang):
     """
     prints and gets input for single word
     """
@@ -64,13 +52,13 @@ def ask_word(word, lang='en'):
     message = input("Translate (%s): %s \n" % (lang.upper(), word))
     return message
 
-def read_single_word(text, lang='en'):
+def read_single_word(text, lang):
     """
     voise for single word
     """
 
     tmp_file_name = 'tmp_%s.mp3' % str(random.uniform(1, 10e5)).replace('.', '')
-    tts = gTTS(text=text, lang=lang)
+    tts = gTTS(text=text, lang=lang_to)
     tts.save(tmp_file_name)
 
     music = pyglet.media.load(tmp_file_name, streaming=False)
@@ -85,10 +73,10 @@ def do_step(index, word_pair):
     """
 
     print(index)
-    if flag_do_sound: read_single_word(word_pair[1], lang)
-    res = ask_word(word_pair[0], lang)
+    if flag_do_sound: read_single_word(word_pair[1], lang_from)
+    res = ask_word(word_pair[0], lang_to)
     result = False
-    if res == word_pair[1]:
+    if res.lower() == word_pair[1].lower():
         print('Correct! \n')
         result = True
     else:
@@ -101,29 +89,39 @@ def parse_args():
     DO_SILENT = '-silent'
     DO_SKIP_WRITE = '-test'
     DO_NUMBER = '-n'
-    
+
+    global flag_do_sound
+    global flag_do_write
+    global number_words
+
     args = sys.argv
     usedargs = args[1:]
 
     for index, item in enumerate(usedargs):
-        print(len(usedargs), index, item == DO_NUMBER, int(usedargs[index+1]))
-        # if(item == DO_SILENT): 
-        #      global flag_do_sound
-        #      flag_do_sound = False
+        if(item == DO_SILENT): 
+             flag_do_sound = False
 
-        # if(item == DO_SKIP_WRITE): 
-        #      global flag_do_write
-        #      flag_do_write = False
+        if(item == DO_SKIP_WRITE): 
+             flag_do_write = False
 
         if(index <= len(usedargs) and item == DO_NUMBER): 
-             global number_words
              number_words = usedargs[index+1]
-    
-    print(flag_do_sound, flag_do_write, number_words)
 
 def init():
     parse_args()
-    read_language_pair()
-    #calc_stats(ask_words_list(number_words))
+    global lang_from, lang_to
+    lang_from, lang_to = exportcsv.read_language_pair()
+    print(lang_from, ' -> ', lang_to)
+    ask_words_list(number_words)
+    calc_stats()
 
-init()
+if __name__ == '__main__':
+    try:
+        init()
+    except KeyboardInterrupt:
+        print ('\n Closing')
+        calc_stats()
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
