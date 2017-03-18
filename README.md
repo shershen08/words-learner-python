@@ -9,7 +9,7 @@ Can be used with any two pairs of languages, say French -> German.
 
 Install dependances
 
-Run: `python(3) learner.py [OPTIONS]`
+Run: `python learner.py [OPTIONS]`
 
 Command line parameters available:
 
@@ -31,6 +31,8 @@ Sheet 2: `results`
 Columns: Date, Words tested, Ratio
 
 ### Dependances
+
+Project uses Python3. So if you have Python v.2 as a default in your setup you need to use `vitrualenv` and/or run the project with `python3 learner.py`
 
 Python libs:
  - exportcsv
