@@ -42,6 +42,10 @@ Python libs:
 Media library (for playing sound files):
  - AVbin [download](https://avbin.github.io/AVbin/Download.html)
 
+ ### Description in jupyter
+
+ To run use `jupyter notebook` when in the project folder. And the open a `word_reader.ipynb` file.
+
  ### License
 
  MIT
