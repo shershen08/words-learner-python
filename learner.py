@@ -15,6 +15,7 @@ lang_from = 'en'
 lang_to = 'en'
 flag_do_sound = True
 flag_do_write = True
+flag_do_vocfile = False
 number_words = 10
 
 #global var 
@@ -58,6 +59,9 @@ def calc_stats():
         if flag_do_write: exportcsv.write_stats(number_words, success_ratio)
 
         print('Success ratio: %s' % success_ratio)
+
+def generate_voc_file():
+    print('generate_voc_file')
 
 def ask_word(word_translate):
     """
@@ -105,9 +109,11 @@ def parse_cli_args():
     DO_SILENT = '-silent'
     DO_SKIP_WRITE = '-test'
     DO_NUMBER = '-n'
+    DO_VOCFILE = '-vocfile'
 
     global flag_do_sound
     global flag_do_write
+    global flag_do_vocfile
     global number_words
 
     args = sys.argv
@@ -119,6 +125,9 @@ def parse_cli_args():
 
         if(item == DO_SKIP_WRITE): 
              flag_do_write = False
+        
+        if(item == DO_VOCFILE): 
+             flag_do_vocfile = True
 
         if(argument_index <= len(usedargs) and item == DO_NUMBER): 
              number_words = usedargs[argument_index+1]
@@ -128,16 +137,22 @@ def init():
     global lang_from, lang_to
     lang_from, lang_to = exportcsv.read_language_pair()
     print(lang_from, ' -> ', lang_to)
-    #ask_words_list(number_words)
-    ask_random_words_list(number_words)
-    calc_stats()
+    ask_words_list(number_words)
+
+    if(flag_do_vocfile is True):
+        generate_voc_file()
+    else:
+        ask_random_words_list(number_words)
+        calc_stats()
 
 if __name__ == '__main__':
     try:
         init()
     except KeyboardInterrupt:
         print ('\n Closing')
-        calc_stats()
+        if(flag_do_vocfile is False):
+            calc_stats()
+
         try:
             sys.exit(0)
         except SystemExit:

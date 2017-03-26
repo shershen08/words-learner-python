@@ -16,6 +16,7 @@ Command line parameters available:
  - `-n [NUMBER]` how many words to ask in one run, defaults to 10; for example `python learner.py -n 15`;
  - `-test` to skip writing the results to Excel file;
  - `-silent` to skipe workd voiceover while iterating;
+ - `-vocfile` skip the test and generate a single file with all words pairs;
 
 ### Data file structure
 
@@ -32,7 +33,7 @@ Columns: Date, Words tested, Ratio
 
 ### Dependances
 
-Project uses Python3. So if you have Python v.2 as a default in your setup you need to use `vitrualenv` and/or run the project with `python3 learner.py`
+Project uses Python3. So if you have Python v.2 as a default in your setup (MacOS for example) you need to use `vitrualenv` and/or run the project with `python3 learner.py`
 
 Python libs:
  - exportcsv
@@ -45,6 +46,12 @@ Media library (for playing sound files):
  ### Description in jupyter
 
  To run use `jupyter notebook` when in the project folder. And the open a `word_reader.ipynb` file.
+
+ ### Vocabulary reading
+ 
+ Now you can generate one file to repeat all your vocabulary pairs. May be handy to dowonload and listen latr on you mobile device. Use `-vocfile` option for that.
+
+ The "ding" sound is by [Kastenfrosch](https://www.freesound.org/people/Kastenfrosch/sounds/162464/).
 
  ### License
 
