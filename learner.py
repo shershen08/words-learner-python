@@ -66,19 +66,14 @@ def calc_stats():
         print('Success ratio: %s' % success_ratio)
 
 
-def generate_one_pair(pair):
+def generate_sound_file(text_to_read, lang_to_use):
     """
-    creates two files with read words
+    creates a mp3 file with read word
     """
-    #1
-    tmp_file_name1 = '%s/tmp_%s.mp3' % (sound_tmp_dir, str(random.uniform(1, 10e6)).replace('.', ''))
-    tts = gTTS(text=pair[0].value, lang=lang_to)
-    tts.save(tmp_file_name1)
-    #2
-    tmp_file_name2 = '%s/tmp_%s.mp3' % (sound_tmp_dir, str(random.uniform(1, 10e6)).replace('.', ''))
-    tts = gTTS(text=pair[1].value, lang=lang_from)
-    tts.save(tmp_file_name2)
-    return tmp_file_name1, tmp_file_name2
+    tmp_file_name = '%s/tmp_%s.mp3' % (sound_tmp_dir, str(random.uniform(1, 10e6)).replace('.', ''))
+    tts = gTTS(text=text_to_read, lang=lang_to_use)
+    tts.save(tmp_file_name)
+    return tmp_file_name
 
 def generate_voc_file():
     """
@@ -94,7 +89,8 @@ def generate_voc_file():
     create_dir_if_needed()
 
     for row in rows:
-        word_file_1, word_file_2 = generate_one_pair(row)
+        word_file_1 = generate_sound_file(row[0].value, lang_to)
+        word_file_2 = generate_sound_file(row[1].value, lang_from)
         word1 = AudioSegment.from_mp3(word_file_1)
         word2 = AudioSegment.from_mp3(word_file_2)
         mashup = mashup + word1 + word2 + ding
@@ -122,9 +118,7 @@ def read_single_word(text_to_read):
     using global 'lang_to' for lang selection
     """
     create_dir_if_needed()
-    tmp_file_name = '%s/tmp_%s.mp3' % (sound_tmp_dir, str(random.uniform(1, 10e5)).replace('.', ''))
-    tts = gTTS(text=text_to_read, lang=lang_to)
-    tts.save(tmp_file_name)
+    tmp_file_name = generate_sound_file(text_to_read, lang_to)
 
     music = pyglet.media.load(tmp_file_name, streaming=False)
     music.play()
