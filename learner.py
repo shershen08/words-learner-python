@@ -20,6 +20,7 @@ number_words = 10
 
 #global var 
 results = []
+sound_tmp_dir = 'tmp'
 
 def ask_words_list(total_words_toask=number_words):
     """
@@ -43,7 +44,7 @@ def ask_random_words_list(total_words_toask=number_words):
     sheet = exportcsv.read_words_list()
     max_index = exportcsv.get_total_lines(sheet)
     rows = list(sheet.rows)
-    
+
     for step_index in range(int(total_words_toask)):
         random_index = int(random.uniform(1, max_index))
         row = rows[random_index]
@@ -71,13 +72,17 @@ def ask_word(word_translate):
     message = input("Translate (%s): %s \n" % (lang_from.upper(), word_translate))
     return message
 
+def create_dir_if_needed():
+    if not os.path.exists(sound_tmp_dir):
+        os.makedirs(sound_tmp_dir)
+
 def read_single_word(text_to_read):
     """
     voiceover for single word
     using global 'lang_to' for lang selection
     """
-
-    tmp_file_name = 'tmp_%s.mp3' % str(random.uniform(1, 10e5)).replace('.', '')
+    create_dir_if_needed()
+    tmp_file_name = 'tmp/tmp_%s.mp3' % str(random.uniform(1, 10e5)).replace('.', '')
     tts = gTTS(text=text_to_read, lang=lang_to)
     tts.save(tmp_file_name)
 
@@ -137,7 +142,7 @@ def init():
     global lang_from, lang_to
     lang_from, lang_to = exportcsv.read_language_pair()
     print(lang_from, ' -> ', lang_to)
-    ask_words_list(number_words)
+    #ask_words_list(number_words)
 
     if(flag_do_vocfile is True):
         generate_voc_file()
