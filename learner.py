@@ -1,9 +1,12 @@
 import exportcsv
 
+
 import random
 import os
 import sys
 from time import sleep
+
+from pydub import AudioSegment
 from gtts import gTTS
 import pyglet
 
@@ -21,6 +24,7 @@ number_words = 10
 #global var 
 results = []
 sound_tmp_dir = 'tmp'
+sound_vocabulary_filename = 'vocabulary.mp3'
 
 def ask_words_list(total_words_toask=number_words):
     """
@@ -61,8 +65,45 @@ def calc_stats():
 
         print('Success ratio: %s' % success_ratio)
 
+
+def generate_one_pair(pair):
+    """
+    creates two files with read words
+    """
+    #1
+    #TODO: use sound_tmp_dir 
+    tmp_file_name1 = 'tmp/tmp_%s.mp3' % str(random.uniform(1, 10e6)).replace('.', '')
+    tts = gTTS(text=pair[0].value, lang=lang_to)
+    tts.save(tmp_file_name1)
+    #2
+    tmp_file_name2 = 'tmp/tmp_%s.mp3' % str(random.uniform(1, 10e6)).replace('.', '')
+    tts = gTTS(text=pair[1].value, lang=lang_from)
+    tts.save(tmp_file_name2)
+    return tmp_file_name1, tmp_file_name2
+
 def generate_voc_file():
-    print('generate_voc_file')
+    """
+    iterates words and concatenates them with separator in between
+    """
+    mashup = AudioSegment.empty()
+    ding = AudioSegment.from_mp3("ding_sound.mp3")
+
+    sheet = exportcsv.read_words_list()
+    max_index = exportcsv.get_total_lines(sheet)
+    rows = list(sheet.rows)
+
+    create_dir_if_needed()
+
+    for row in rows:
+        word_file_1, word_file_2 = generate_one_pair(row)
+        word1 = AudioSegment.from_mp3(word_file_1)
+        word2 = AudioSegment.from_mp3(word_file_2)
+        mashup = mashup + word1 + word2 + ding
+        os.remove(word1)
+        os.remove(word2)
+        
+    mashup.export(sound_vocabulary_filename, format="mp3")
+    print('generated vocabulary file')
 
 def ask_word(word_translate):
     """

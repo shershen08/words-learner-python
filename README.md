@@ -51,6 +51,8 @@ Media library (for playing sound files):
  
  Now you can generate one file to repeat all your vocabulary pairs. May be handy to dowonload and listen latr on you mobile device. Use `-vocfile` option for that.
 
+ For this feature the pydub is used that relies on ffmpeg. Installation [pydub tips here](https://github.com/jiaaro/pydub#installation).
+
  The "ding" sound is by [Kastenfrosch](https://www.freesound.org/people/Kastenfrosch/sounds/162464/).
 
  ### License
