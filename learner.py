@@ -71,12 +71,11 @@ def generate_one_pair(pair):
     creates two files with read words
     """
     #1
-    #TODO: use sound_tmp_dir 
-    tmp_file_name1 = 'tmp/tmp_%s.mp3' % str(random.uniform(1, 10e6)).replace('.', '')
+    tmp_file_name1 = '%s/tmp_%s.mp3' % (sound_tmp_dir, str(random.uniform(1, 10e6)).replace('.', ''))
     tts = gTTS(text=pair[0].value, lang=lang_to)
     tts.save(tmp_file_name1)
     #2
-    tmp_file_name2 = 'tmp/tmp_%s.mp3' % str(random.uniform(1, 10e6)).replace('.', '')
+    tmp_file_name2 = '%s/tmp_%s.mp3' % (sound_tmp_dir, str(random.uniform(1, 10e6)).replace('.', ''))
     tts = gTTS(text=pair[1].value, lang=lang_from)
     tts.save(tmp_file_name2)
     return tmp_file_name1, tmp_file_name2
@@ -123,7 +122,7 @@ def read_single_word(text_to_read):
     using global 'lang_to' for lang selection
     """
     create_dir_if_needed()
-    tmp_file_name = 'tmp/tmp_%s.mp3' % str(random.uniform(1, 10e5)).replace('.', '')
+    tmp_file_name = '%s/tmp_%s.mp3' % (sound_tmp_dir, str(random.uniform(1, 10e5)).replace('.', ''))
     tts = gTTS(text=text_to_read, lang=lang_to)
     tts.save(tmp_file_name)
 
