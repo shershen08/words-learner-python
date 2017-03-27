@@ -4,6 +4,7 @@ import argparse
 import random
 import os
 import sys
+import glob
 from time import sleep
 
 from pydub import AudioSegment
@@ -22,6 +23,7 @@ flag_do_vocfile = False
 number_words = 10
 
 #global var 
+used_indices = []
 results = []
 sound_tmp_dir = 'tmp'
 sound_vocabulary_filename = 'vocabulary.mp3'
@@ -39,6 +41,22 @@ def ask_words_list(total_words_toask=number_words):
         if i > start and i <=int(total_words_toask) + start:
             results.append(do_step(i, (row[0].value, row[1].value)))
 
+def get_random_index(max_av_index):
+    """
+    maintains a list of already used indexes and generates always a unique one
+    """
+    global used_indices
+    def generate_ind():
+        return int(random.uniform(1, max_av_index))
+    
+    #get unique one
+    selected_ind = generate_ind()
+    while (selected_ind in used_indices or selected_ind == 1):
+        selected_ind =  generate_ind()
+    
+    used_indices.append(selected_ind)
+    return selected_ind
+
 def ask_random_words_list(total_words_toask=number_words):
     """
     checks words from random parts of the list
@@ -50,8 +68,8 @@ def ask_random_words_list(total_words_toask=number_words):
     rows = list(sheet.rows)
 
     for step_index in range(int(total_words_toask)):
-        random_index = int(random.uniform(1, max_index))
-        row = rows[random_index]
+        random_index = get_random_index(max_index)
+        row = rows[random_index-1]
         results.append(do_step(step_index, (row[0].value, row[1].value)))
 
 def calc_stats():
@@ -107,6 +125,12 @@ def ask_word(word_translate):
 
     message = input("Translate (%s): %s \n" % (lang_from.upper(), word_translate))
     return message
+
+def clear_tmp_dir():
+    path = '%s/*' % sound_tmp_dir
+    files = glob.glob(path)
+    for f in files:
+        os.remove(f)
 
 def create_dir_if_needed():
     if not os.path.exists(sound_tmp_dir):
@@ -174,6 +198,7 @@ def init():
     else:
         ask_random_words_list(number_words)
         calc_stats()
+        clear_tmp_dir()
 
 if __name__ == '__main__':
     try:
@@ -182,7 +207,7 @@ if __name__ == '__main__':
         print ('\n Closing')
         if(flag_do_vocfile is False):
             calc_stats()
-
+            clear_tmp_dir()
         try:
             sys.exit(0)
         except SystemExit:
