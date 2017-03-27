@@ -1,5 +1,5 @@
 import exportcsv
-
+import argparse
 
 import random
 import os
@@ -145,34 +145,25 @@ def do_step(step_index, word_pair):
     return step_result
 
 def parse_cli_args():
-    DO_SILENT = '-silent'
-    DO_SKIP_WRITE = '-test'
-    DO_NUMBER = '-n'
-    DO_VOCFILE = '-vocfile'
 
-    global flag_do_sound
-    global flag_do_write
-    global flag_do_vocfile
-    global number_words
+    parser = argparse.ArgumentParser(description='Words reading and checking')
+    parser.add_argument('-silent', action='store_false', help='Skip word voiceover while iterating ')
+    parser.add_argument('-test', action='store_false', help='Do not save quiz results to file')
+    parser.add_argument('-n', help='Number of words to ask')
+    parser.add_argument('-vocfile', action='store_true', help='Generate a file with all words pronounced')
+    args = vars(parser.parse_args())
+    
+    numer_words = 10
 
-    args = sys.argv
-    usedargs = args[1:]
+    if (args['n']):
+        numer_words = args['n']
 
-    for argument_index, item in enumerate(usedargs):
-        if(item == DO_SILENT): 
-             flag_do_sound = False
-
-        if(item == DO_SKIP_WRITE): 
-             flag_do_write = False
-        
-        if(item == DO_VOCFILE): 
-             flag_do_vocfile = True
-
-        if(argument_index <= len(usedargs) and item == DO_NUMBER): 
-             number_words = usedargs[argument_index+1]
+    return args['test'], args['vocfile'], args['silent'], numer_words
 
 def init():
-    parse_cli_args()
+    global flag_do_sound, flag_do_write, flag_do_vocfile, number_words
+    flag_do_write, flag_do_vocfile, flag_do_sound, number_words = parse_cli_args()
+
     global lang_from, lang_to
     lang_from, lang_to = exportcsv.read_language_pair()
     print(lang_from, ' -> ', lang_to)

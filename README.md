@@ -15,7 +15,7 @@ Command line parameters available:
 
  - `-n [NUMBER]` how many words to ask in one run, defaults to 10; for example `python learner.py -n 15`;
  - `-test` to skip writing the results to Excel file;
- - `-silent` to skipe workd voiceover while iterating;
+ - `-silent` to skip word voiceover while iterating;
  - `-vocfile` skip the test and generate a single file with all words pairs;
 
 ### Data file structure
