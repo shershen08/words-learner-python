@@ -79,7 +79,8 @@ def calc_stats():
     if len(results) > 0:
         success_ratio = results.count(True)/len(results)
 
-        if flag_do_write: exportcsv.write_stats(number_words, success_ratio)
+        if flag_do_write:
+            exportcsv.write_stats(number_words, success_ratio)
 
         print('Success ratio: %s' % success_ratio)
 
@@ -99,30 +100,34 @@ def generate_voc_file():
     """
     mashup = AudioSegment.empty()
     ding = AudioSegment.from_mp3("ding_sound.mp3")
+    less_loud_ding = ding - 20
+    half_second_of_silence = AudioSegment.silent(duration=500)
 
     sheet = exportcsv.read_words_list()
     max_index = exportcsv.get_total_lines(sheet)
     rows = list(sheet.rows)
-
+    rows.pop(0)
+    
     create_dir_if_needed()
 
     for row in rows:
-        word_file_1 = generate_sound_file(row[0].value, lang_to)
-        word_file_2 = generate_sound_file(row[1].value, lang_from)
+        word_file_1 = generate_sound_file(row[0].value, lang_from)
+        word_file_2 = generate_sound_file(row[1].value, lang_to)
         word1 = AudioSegment.from_mp3(word_file_1)
         word2 = AudioSegment.from_mp3(word_file_2)
-        mashup = mashup + word1 + word2 + ding
-        os.remove(word1)
-        os.remove(word2)
-        
+        #first - unknown lang, second - unknown lang
+        mashup = mashup + word2 + half_second_of_silence + word1 + less_loud_ding
+        os.remove(word_file_1)
+        os.remove(word_file_2)
+
     mashup.export(sound_vocabulary_filename, format="mp3")
+    clear_tmp_dir()
     print('generated vocabulary file')
 
 def ask_word(word_translate):
     """
     prints and gets input for single word
     """
-
     message = input("Translate (%s): %s \n" % (lang_from.upper(), word_translate))
     return message
 
@@ -143,7 +148,6 @@ def read_single_word(text_to_read):
     """
     create_dir_if_needed()
     tmp_file_name = generate_sound_file(text_to_read, lang_to)
-
     music = pyglet.media.load(tmp_file_name, streaming=False)
     music.play()
 
@@ -154,7 +158,6 @@ def do_step(step_index, word_pair):
     """
     does actions for reading and saking one word pair
     """
-
     print(step_index)
     if flag_do_sound: read_single_word(word_pair[1])
     res = ask_word(word_pair[0])
@@ -169,14 +172,12 @@ def do_step(step_index, word_pair):
     return step_result
 
 def parse_cli_args():
-
     parser = argparse.ArgumentParser(description='Words reading and checking')
     parser.add_argument('-silent', action='store_false', help='Skip word voiceover while iterating ')
     parser.add_argument('-test', action='store_false', help='Do not save quiz results to file')
     parser.add_argument('-n', help='Number of words to ask')
     parser.add_argument('-vocfile', action='store_true', help='Generate a file with all words pronounced')
     args = vars(parser.parse_args())
-    
     numer_words = 10
 
     if (args['n']):
