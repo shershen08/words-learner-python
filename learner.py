@@ -90,9 +90,14 @@ def generate_sound_file(text_to_read, lang_to_use):
     creates a mp3 file with read word
     """
     tmp_file_name = '%s/tmp_%s.mp3' % (sound_tmp_dir, str(random.uniform(1, 10e6)).replace('.', ''))
-    tts = gTTS(text=text_to_read, lang=lang_to_use)
-    tts.save(tmp_file_name)
-    return tmp_file_name
+
+    try:
+        tts = gTTS(text=text_to_read, lang=lang_to_use)
+        tts.save(tmp_file_name)
+        return tmp_file_name
+    except:
+        print('Error: selected language \'%s\' is not supported by the Google Text to Speech API, https://pypi.python.org/pypi/gTTS' % lang_to_use)
+        sys.exit(0)
 
 def generate_voc_file():
     """
@@ -130,6 +135,9 @@ def ask_word(word_translate):
     """
     message = input("Translate (%s): %s \n" % (lang_from.upper(), word_translate))
     return message
+
+def check_file_exists(name):
+    return os.path.exists(name)
 
 def clear_tmp_dir():
     path = '%s/*' % sound_tmp_dir
@@ -176,6 +184,8 @@ def parse_cli_args():
     parser.add_argument('-silent', action='store_false', help='Skip word voiceover while iterating ')
     parser.add_argument('-test', action='store_false', help='Do not save quiz results to file')
     parser.add_argument('-n', help='Number of words to ask')
+    parser.add_argument('-r', action='store_false', help='Reverse source file collumns usage')
+    parser.add_argument('-f', help='Filename to process (default: words.xslx)')
     parser.add_argument('-vocfile', action='store_true', help='Generate a file with all words pronounced')
     args = vars(parser.parse_args())
     numer_words = 10
@@ -183,11 +193,16 @@ def parse_cli_args():
     if (args['n']):
         numer_words = args['n']
 
-    return args['test'], args['vocfile'], args['silent'], numer_words
+    if (args['f'] and check_file_exists(args['f'])):
+        exportcsv.set_filename(args['f'])
+
+    return args['test'], args['r'], args['vocfile'], args['silent'], numer_words
 
 def init():
     global flag_do_sound, flag_do_write, flag_do_vocfile, number_words
-    flag_do_write, flag_do_vocfile, flag_do_sound, number_words = parse_cli_args()
+    flag_do_write, flag_reverse, flag_do_vocfile, flag_do_sound, number_words = parse_cli_args()
+
+    # TODO: implement Reverse option
 
     global lang_from, lang_to
     lang_from, lang_to = exportcsv.read_language_pair()
