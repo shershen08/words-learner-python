@@ -1,11 +1,11 @@
 import exportcsv
-import argparse
+import utils
 
 import random
 import os
 import sys
-import glob
-from time import sleep
+
+from time import sleep, gmtime, strftime
 
 from pydub import AudioSegment
 from gtts import gTTS
@@ -15,38 +15,15 @@ pyglet.lib.load_library('avbin')
 pyglet.have_avbin=True
 
 # set global flags
-lang_from = 'en'
-lang_to = 'en'
-flag_do_sound = True
-flag_do_write = True
-flag_do_vocfile = False
-number_words = 10
+lang_from, lang_to = 'en', 'en'
+flag_do_sound, flag_do_write, flag_do_vocfile  = True, True, False
 
 #global var 
+number_words = 10
 used_indices = []
 results = []
 sound_tmp_dir = 'tmp'
-sound_vocabulary_filename = 'vocabulary.mp3'
-
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█'):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
-    # Print New Line on Complete
-    if iteration == total: 
-        print()
+sound_vocabulary_filename = 'vocabulary'
 
 def ask_words_list(total_words_toask=number_words):
     """
@@ -123,23 +100,31 @@ def generate_voc_file():
     """
     iterates words and concatenates them with separator in between
     """
-    mashup = AudioSegment.empty()
-    ding = AudioSegment.from_mp3("ding_sound.mp3")
-    less_loud_ding = ding - 20
-    half_second_of_silence = AudioSegment.silent(duration=500)
-
     sheet = exportcsv.read_words_list()
     max_index = exportcsv.get_total_lines(sheet)
     rows = list(sheet.rows)
     rows.pop(0)
     
-    create_dir_if_needed()
+    utils.create_dir_if_needed(sound_tmp_dir)
 
+    mashup = iterate_rows(rows)
 
+    file_name = '%s %s to %s from %s.mp3' % (sound_vocabulary_filename, lang_to.upper(), lang_from.upper(), strftime("%d-%b-%Y %H:%M", gmtime()), )
+
+    mashup.export(file_name , format="mp3")
+    utils.clear_tmp_dir(sound_tmp_dir)
+    print('Generated vocabulary file: %s' % file_name)
+
+def iterate_rows(rows):
+    mashup = AudioSegment.empty()
+    ding = AudioSegment.from_mp3("ding_sound.mp3")
+    less_loud_ding = ding - 20
+    half_second_of_silence = AudioSegment.silent(duration=500)
+    
     i = 0
     l = len(rows)
     # Initial call to print 0% progress
-    printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
+    utils.printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
     for row in rows:
         word_file_1 = generate_sound_file(row[0].value, lang_from)
@@ -151,11 +136,9 @@ def generate_voc_file():
         os.remove(word_file_1)
         os.remove(word_file_2)
         i += 1
-        printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
+        utils.printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
-    mashup.export(sound_vocabulary_filename, format="mp3")
-    clear_tmp_dir()
-    print('generated vocabulary file')
+    return mashup
 
 def ask_word(word_translate):
     """
@@ -164,25 +147,12 @@ def ask_word(word_translate):
     message = input("Translate (%s): %s \n" % (lang_from.upper(), word_translate))
     return message
 
-def check_file_exists(name):
-    return os.path.exists(name)
-
-def clear_tmp_dir():
-    path = '%s/*' % sound_tmp_dir
-    files = glob.glob(path)
-    for f in files:
-        os.remove(f)
-
-def create_dir_if_needed():
-    if not os.path.exists(sound_tmp_dir):
-        os.makedirs(sound_tmp_dir)
-
 def read_single_word(text_to_read):
     """
     voiceover for single word
     using global 'lang_to' for lang selection
     """
-    create_dir_if_needed()
+    utils.create_dir_if_needed(sound_tmp_dir)
     tmp_file_name = generate_sound_file(text_to_read, lang_to)
     music = pyglet.media.load(tmp_file_name, streaming=False)
     music.play()
@@ -207,28 +177,9 @@ def do_step(step_index, word_pair):
 
     return step_result
 
-def parse_cli_args():
-    parser = argparse.ArgumentParser(description='Words reading and checking')
-    parser.add_argument('-silent', action='store_false', help='Skip word voiceover while iterating ')
-    parser.add_argument('-test', action='store_false', help='Do not save quiz results to file')
-    parser.add_argument('-n', help='Number of words to ask')
-    parser.add_argument('-r', action='store_false', help='Reverse source file collumns usage')
-    parser.add_argument('-f', help='Filename to process (default: words.xslx)')
-    parser.add_argument('-vocfile', action='store_true', help='Generate a file with all words pronounced')
-    args = vars(parser.parse_args())
-    numer_words = 10
-
-    if (args['n']):
-        numer_words = args['n']
-
-    if (args['f'] and check_file_exists(args['f'])):
-        exportcsv.set_filename(args['f'])
-
-    return args['test'], args['r'], args['vocfile'], args['silent'], numer_words
-
 def init():
     global flag_do_sound, flag_do_write, flag_do_vocfile, number_words
-    flag_do_write, flag_reverse, flag_do_vocfile, flag_do_sound, number_words = parse_cli_args()
+    flag_do_write, flag_reverse, flag_do_vocfile, flag_do_sound, number_words = utils.parse_cli_args()
 
     # TODO: implement Reverse option
 
@@ -242,7 +193,7 @@ def init():
     else:
         ask_random_words_list(number_words)
         calc_stats()
-        clear_tmp_dir()
+        utils.clear_tmp_dir(sound_tmp_dir)
 
 if __name__ == '__main__':
     try:
@@ -251,7 +202,7 @@ if __name__ == '__main__':
         print ('\n Closing')
         if(flag_do_vocfile is False):
             calc_stats()
-            clear_tmp_dir()
+            utils.clear_tmp_dir(sound_tmp_dir)
         try:
             sys.exit(0)
         except SystemExit:
