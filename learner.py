@@ -28,6 +28,26 @@ results = []
 sound_tmp_dir = 'tmp'
 sound_vocabulary_filename = 'vocabulary.mp3'
 
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█'):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
 def ask_words_list(total_words_toask=number_words):
     """
     iterates certain amount of word lines between start and (start + limit)
@@ -115,6 +135,12 @@ def generate_voc_file():
     
     create_dir_if_needed()
 
+
+    i = 0
+    l = len(rows)
+    # Initial call to print 0% progress
+    printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
+
     for row in rows:
         word_file_1 = generate_sound_file(row[0].value, lang_from)
         word_file_2 = generate_sound_file(row[1].value, lang_to)
@@ -124,6 +150,8 @@ def generate_voc_file():
         mashup = mashup + word2 + half_second_of_silence + word1 + less_loud_ding
         os.remove(word_file_1)
         os.remove(word_file_2)
+        i += 1
+        printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
     mashup.export(sound_vocabulary_filename, format="mp3")
     clear_tmp_dir()
