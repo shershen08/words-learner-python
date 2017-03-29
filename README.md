@@ -42,17 +42,18 @@ Python libs:
  - exportcsv
  - gtts
  - pyglet
+ - pydub
 
 Media library (for playing sound files):
  - AVbin [download](https://avbin.github.io/AVbin/Download.html)
 
- ### Description in jupyter
+ <!--### Description in jupyter
 
- To run use `jupyter notebook` when in the project folder. And the open a `word_reader.ipynb` file.
+ To run use `jupyter notebook` when in the project folder. And the open a `word_reader.ipynb` file.-->
 
  ### Vocabulary reading
  
- Now you can generate one file to repeat all your vocabulary pairs. May be handy to dowonload and listen latr on you mobile device. Use `-vocfile` option for that.
+ Now you can generate one file to repeat all your vocabulary pairs. May be handy to dowonload and listen latr on you mobile device. Use `-vocfile` option for that. Sample output you can see here: [italian - english words reading .mp3 file, 2Mb](http://picosong.com/pAB2)
 
  For this feature the pydub is used that relies on ffmpeg. Installation [pydub tips here](https://github.com/jiaaro/pydub#installation).
 
