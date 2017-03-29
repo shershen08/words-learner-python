@@ -3,7 +3,7 @@
 
 Reads words from the file, then produces the sound of the word and its translation in onle language, later checks the correctness of your typing in console for this word translation . Later calculated the stats and saves to the file.
 
-Can be used with any two pairs of languages, say French -> German.
+Can be used with any two pairs of languages, say French -> German. List of supported languages depends on the gtts library, [the full list see here](https://pypi.python.org/pypi/gTTS)
 
 ### Usage
 
@@ -13,19 +13,22 @@ Run: `python learner.py [OPTIONS]`
 
 Command line parameters available:
 
+ - `-h` show help options;
  - `-n [NUMBER]` how many words to ask in one run, defaults to 10; for example `python learner.py -n 15`;
  - `-test` to skip writing the results to Excel file;
+ <!--- `-r` reverse Excel file collumns;-->
  - `-silent` to skip word voiceover while iterating;
  - `-vocfile` skip the test and generate a single file with all words pairs;
+ - `-f [PATH_AND_FILENAME]` set source filename different from 'words.xlsx';
 
 ### Data file structure
 
 Excel file is stored in the same folder and is used to store the words that need to be checked (can be added by hand on Sheet 1) and the results of the tests (on Sheet 2).
 
-Excel file filename: `words.xlsx`
+Default excel file filename - `words.xlsx` (can be changed with `-f` option)
 
 Sheet 1: `words`
-Columns: language names; in this demo case it is `en` and `it`.
+Columns: language names; in this demo case it is `en` and `it` which means English and Italian.
 First column should contain the language known to the user, while the second one the language being learned.
 
 Sheet 2: `results`
