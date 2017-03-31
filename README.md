@@ -63,6 +63,14 @@ Media library (for playing sound files):
  For this feature the pydub is used that relies on ffmpeg. Installation [pydub tips here](https://github.com/jiaaro/pydub#installation).
 
  The "ding" sound is by [Kastenfrosch](https://www.freesound.org/people/Kastenfrosch/sounds/162464/).
+ 
+ 
+ ### TODOs
+ 
+ 1. add frontend to upload/download files so that the app could run on heroku or GCE
+ 2. add non-techy description / images
+ 3. option to parse translate.google.com excel file format
+ 4. add option to reverse languages 
 
  ### License
 
